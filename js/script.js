@@ -1,0 +1,299 @@
+// UI behaviour: navigation, menu rendering, gallery lightbox, reservation form.
+
+const $ = (sel, root = document) => root.querySelector(sel);
+
+// ---------- Navigation ----------
+const navToggle = $(".nav-toggle");
+const navLinks = $("#nav-links");
+
+function setNav(open) {
+  navLinks.classList.toggle("open", open);
+  navToggle.setAttribute("aria-expanded", String(open));
+}
+navToggle.addEventListener("click", () => setNav(!navLinks.classList.contains("open")));
+navLinks.addEventListener("click", (e) => { if (e.target.closest("a")) setNav(false); });
+
+$("#year").textContent = new Date().getFullYear();
+
+// ---------- Motion ----------
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const revealObserver = new IntersectionObserver((entries) => {
+  for (const entry of entries) {
+    if (!entry.isIntersecting) continue;
+    entry.target.classList.add("in");
+    revealObserver.unobserve(entry.target);
+    if (entry.target.dataset.count) countUp(entry.target);
+  }
+}, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+
+function observeReveal(el, variant, delay = 0) {
+  el.classList.add("reveal");
+  if (variant) el.dataset.r = variant;
+  el.style.setProperty("--d", delay + "s");
+  revealObserver.observe(el);
+}
+
+// Every element on the page animates in when it scrolls into view, staggered per parent.
+const REVEALS = [
+  [".section-head > *", "up"],
+  ["#menu-filters", "up"],
+  [".about-image", "left"],
+  [".about-grid > div:last-child > .eyebrow, .about-grid > div:last-child > .section-title, .about-grid > div:last-child > p", "right"],
+  [".chef", "right"],
+  [".highlights li", "zoom"],
+  [".gallery-item", "zoom"],
+  ["#reservation-form > :not(.hp)", "up"],
+  [".contact-grid > div:first-child > .eyebrow, .contact-grid > div:first-child > .section-title", "left"],
+  [".contact-list li", "left"],
+  [".map", "right"],
+  [".footer-inner", "up"],
+];
+const staggerByParent = new Map();
+for (const [selector, variant] of REVEALS) {
+  document.querySelectorAll(selector).forEach((el) => {
+    const n = staggerByParent.get(el.parentElement) ?? 0;
+    staggerByParent.set(el.parentElement, n + 1);
+    observeReveal(el, variant, Math.min(n, 8) * 0.09);
+  });
+}
+
+function countUp(el) {
+  const target = Number(el.dataset.count);
+  const suffix = el.dataset.suffix || "";
+  if (reduceMotion) return;
+  const start = performance.now();
+  const duration = 1500;
+  (function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3))) + suffix;
+    if (t < 1) requestAnimationFrame(tick);
+  })(start);
+}
+document.querySelectorAll("[data-count]").forEach((el) => {
+  if (reduceMotion) return;
+  el.textContent = "0" + (el.dataset.suffix || "");
+  revealObserver.observe(el);
+});
+
+// Rising embers in the hero
+const embers = $(".embers");
+if (embers && !reduceMotion) {
+  embers.append(...Array.from({ length: 24 }, () => {
+    const i = document.createElement("i");
+    i.style.setProperty("--x", Math.random() * 100 + "%");
+    i.style.setProperty("--s", 3 + Math.random() * 6 + "px");
+    i.style.setProperty("--dx", (Math.random() * 120 - 60) + "px");
+    i.style.setProperty("--t", 7 + Math.random() * 8 + "s");
+    i.style.setProperty("--d", -Math.random() * 12 + "s");
+    return i;
+  }));
+}
+
+// Scroll progress, sticky-header shadow and hero parallax
+const progress = $(".scroll-progress");
+const header = $(".site-header");
+const heroBg = $(".hero-bg");
+const heroContent = $(".hero-content");
+let ticking = false;
+function onScroll() {
+  ticking = false;
+  const y = window.scrollY;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+  header.classList.toggle("scrolled", y > 20);
+  if (!reduceMotion && y < window.innerHeight * 1.2) {
+    heroBg.style.translate = `0 ${y * 0.25}px`;
+    heroContent.style.translate = `0 ${y * 0.12}px`;
+  }
+}
+window.addEventListener("scroll", () => {
+  if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+}, { passive: true });
+onScroll();
+
+// Highlight the nav link of the section in view
+const navAnchors = [...navLinks.querySelectorAll('a[href^="#"]:not(.btn)')];
+const sectionObserver = new IntersectionObserver((entries) => {
+  for (const entry of entries) {
+    if (!entry.isIntersecting) continue;
+    navAnchors.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + entry.target.id));
+  }
+}, { rootMargin: "-45% 0px -50% 0px" });
+document.querySelectorAll("main section[id]").forEach((sec) => sectionObserver.observe(sec));
+
+// ---------- Menu ----------
+const menuGrid = $("#menu");
+const menuFilters = $("#menu-filters");
+const menuStatus = $("#menu-status");
+const menuNote = $("#menu-note");
+let menuItems = [];
+let activeCategory = "All";
+
+const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+function renderMenu() {
+  const visible = activeCategory === "All"
+    ? menuItems
+    : menuItems.filter((i) => i.category === activeCategory);
+
+  // Build with DOM APIs (textContent) so database content can never inject HTML.
+  menuGrid.replaceChildren(...visible.map((item) => {
+    const card = document.createElement("article");
+    card.className = "menu-card";
+
+    if (item.image_url) {
+      const img = document.createElement("img");
+      img.src = item.image_url;
+      img.alt = item.name;
+      img.loading = "lazy";
+      card.append(img);
+    }
+
+    const body = document.createElement("div");
+    body.className = "menu-card-body";
+
+    if (item.is_featured) {
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = "Chef's pick";
+      body.append(badge);
+    }
+
+    const top = document.createElement("div");
+    top.className = "menu-card-top";
+    const title = document.createElement("h3");
+    title.textContent = item.name;
+    const price = document.createElement("span");
+    price.className = "price";
+    price.textContent = money.format(item.price);
+    top.append(title, price);
+    body.append(top);
+
+    if (item.description) {
+      const desc = document.createElement("p");
+      desc.textContent = item.description;
+      body.append(desc);
+    }
+
+    card.append(body);
+    return card;
+  }));
+  menuGrid.querySelectorAll(".menu-card").forEach((card, i) => observeReveal(card, "zoom", Math.min(i, 8) * 0.08));
+}
+
+function renderFilters() {
+  const categories = ["All", ...new Set(menuItems.map((i) => i.category))];
+  menuFilters.replaceChildren(...categories.map((cat) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "filter-btn" + (cat === activeCategory ? " active" : "");
+    btn.textContent = cat;
+    btn.addEventListener("click", () => {
+      activeCategory = cat;
+      renderFilters();
+      renderMenu();
+    });
+    return btn;
+  }));
+}
+
+async function loadMenu() {
+  try {
+    const { items, sample } = await fetchMenuItems();
+    menuItems = items;
+    if (!items.length) {
+      menuStatus.textContent = "Our menu is being updated. Please check back soon.";
+      return;
+    }
+    menuStatus.hidden = true;
+    renderFilters();
+    renderMenu();
+    if (sample) {
+      menuNote.hidden = false;
+      menuNote.textContent = "Showing sample items. Connect Supabase in js/supabase.js to load the live menu.";
+    }
+  } catch (err) {
+    console.error("Failed to load menu:", err);
+    menuStatus.classList.add("error");
+    menuStatus.textContent = "Sorry, we couldn't load the menu right now. Please try again later.";
+  }
+}
+loadMenu();
+
+// ---------- Gallery lightbox ----------
+const lightbox = $("#lightbox");
+const lightboxImg = $("img", lightbox);
+
+function closeLightbox() { lightbox.hidden = true; lightboxImg.src = ""; }
+document.querySelectorAll(".gallery-item").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const thumb = $("img", btn);
+    lightboxImg.src = btn.dataset.full;
+    lightboxImg.alt = thumb.alt;
+    lightbox.hidden = false;
+  });
+});
+lightbox.addEventListener("click", (e) => { if (e.target !== lightboxImg) closeLightbox(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !lightbox.hidden) closeLightbox(); });
+
+// ---------- Reservation form ----------
+const form = $("#reservation-form");
+const formMessage = $("#form-message");
+const submitBtn = $("#reservation-submit");
+
+const localISODate = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+form.elements.date.min = localISODate(new Date());
+
+function showMessage(text, type) {
+  formMessage.textContent = text;
+  formMessage.className = "form-message " + type;
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = form.elements;
+
+  // Bots fill the hidden field; pretend success and drop it.
+  if (f.website.value) { showMessage("Thank you!", "success"); return; }
+
+  let firstInvalid = null;
+  for (const field of [f.name, f.phone, f.date, f.time, f.guests]) {
+    const ok = field.value.trim() !== "" && field.checkValidity();
+    field.setAttribute("aria-invalid", String(!ok));
+    if (!ok && !firstInvalid) firstInvalid = field;
+  }
+  if (f.date.value && f.date.value < f.date.min) {
+    f.date.setAttribute("aria-invalid", "true");
+    firstInvalid ||= f.date;
+  }
+  if (firstInvalid) {
+    showMessage("Please check the highlighted fields.", "error");
+    firstInvalid.focus();
+    return;
+  }
+
+  submitBtn.disabled = true;
+  showMessage("Sending your request…", "");
+  try {
+    const { saved } = await submitReservation({
+      customer_name: f.name.value.trim(),
+      phone: f.phone.value.trim(),
+      reservation_date: f.date.value,
+      reservation_time: f.time.value,
+      guests: Number(f.guests.value),
+      message: f.notes.value.trim() || null,
+    });
+    if (saved) {
+      showMessage("Thank you! Your request is received. We'll call to confirm shortly.", "success");
+      form.reset();
+    } else {
+      showMessage("Demo mode: Supabase isn't connected yet, so nothing was saved.", "error");
+    }
+  } catch (err) {
+    console.error("Reservation failed:", err);
+    showMessage("Sorry, something went wrong. Please try again or call us.", "error");
+  } finally {
+    submitBtn.disabled = false;
+  }
+});

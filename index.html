@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dhanvika | Where Every Flavour Tells a Story</title>
+  <meta name="description" content="Dhanvika: where every flavour tells a story. Seasonal, locally sourced, wood-fired dishes. View our menu and reserve a table.">
+  <meta property="og:title" content="Dhanvika | Where Every Flavour Tells a Story">
+  <meta property="og:description" content="Where every flavour tells a story. Reserve your table today.">
+  <meta property="og:image" content="images/hero.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+  <div class="scroll-progress" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header class="site-header" id="top">
+    <div class="container nav">
+      <a href="#home" class="logo">Dhanvika<span>.</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="nav-links" class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#menu-section">Menu</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#contact">Contact</a>
+        <a href="#reservation" class="btn btn-small">Reserve</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Home / Hero -->
+    <section id="home" class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-overlay"></div>
+      <div class="embers" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <p class="eyebrow">Authentic Indian kitchen &middot; Est. 2015</p>
+        <h1>Dhanvika</h1>
+        <p class="tagline">Where every flavour tells a story.</p>
+        <p class="subtagline">Authentic Indian flavours, cooked over open flame.</p>
+        <div class="hero-actions">
+          <a href="#reservation" class="btn">Book a Table</a>
+          <a href="#menu-section" class="btn btn-outline">View Menu</a>
+        </div>
+        <div class="hours-card" aria-label="Opening hours">
+          <h2>Opening Hours</h2>
+          <ul class="hours-list">
+            <li><span>Mon &ndash; Thu</span><span>12:00 &ndash; 22:00</span></li>
+            <li><span>Fri &ndash; Sat</span><span>12:00 &ndash; 23:30</span></li>
+            <li><span>Sunday</span><span>11:00 &ndash; 21:00</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="section">
+      <div class="container about-grid">
+        <div class="about-image">
+          <img src="images/about.jpg" alt="The Dhanvika dining room" loading="lazy">
+        </div>
+        <div>
+          <p class="eyebrow">Our Story</p>
+          <h2 class="section-title">Cooking with fire, honestly</h2>
+          <p>
+            Dhanvika began as a single clay tandoor and a simple idea: great food needs
+            few ingredients, handled with care. Since 2015 we have built relationships with
+            local farms, fishermen and foragers, and let the seasons write our menu.
+          </p>
+          <p>
+            Everything is cooked the traditional way, from tandoor-grilled starters to
+            slow-simmered biryanis, giving each dish a depth of flavour you can taste.
+          </p>
+
+          <div class="chef">
+            <img src="images/chef.jpg" alt="Head Chef Daniel Marsh plating a dish" loading="lazy">
+            <div>
+              <h3>Chef Daniel Marsh</h3>
+              <p class="muted">
+                Trained in kitchens across India and abroad, Daniel returned to open Dhanvika.
+                His cooking is rooted in tradition and driven by what's best this week.
+              </p>
+            </div>
+          </div>
+
+          <ul class="highlights">
+            <li><strong data-count="100" data-suffix="%">100%</strong> traditional tandoor cooking</li>
+            <li><strong data-count="25" data-suffix="+">25+</strong> local suppliers</li>
+            <li><strong>Seasonal</strong> menu, changed monthly</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Menu (loaded from Supabase) -->
+    <section id="menu-section" class="section section-dark">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Our Menu</p>
+          <h2 class="section-title">From the fire</h2>
+        </div>
+        <div id="menu-filters" class="filters" role="tablist" aria-label="Menu categories"></div>
+        <div id="menu-status" class="menu-status" role="status" aria-live="polite">Loading menu&hellip;</div>
+        <div id="menu" class="menu-grid"></div>
+        <p id="menu-note" class="menu-note" hidden></p>
+      </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="section">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Gallery</p>
+          <h2 class="section-title">A taste of the experience</h2>
+        </div>
+        <div class="gallery-grid">
+          <button class="gallery-item tall" data-full="images/dish-1.jpg"><img src="images/dish-1.jpg" alt="Plated signature dish" loading="lazy"></button>
+          <button class="gallery-item" data-full="images/interior-1.jpg"><img src="images/interior-1.jpg" alt="Terrace dining by the water" loading="lazy"></button>
+          <button class="gallery-item" data-full="images/dish-3.jpg"><img src="images/dish-3.jpg" alt="Wood-fired pizza" loading="lazy"></button>
+          <button class="gallery-item tall" data-full="images/dish-5.jpg"><img src="images/dish-5.jpg" alt="Honey-drizzled pancake dessert" loading="lazy"></button>
+          <button class="gallery-item" data-full="images/dish-2.jpg"><img src="images/dish-2.jpg" alt="Sharing plates of grilled meat and salad" loading="lazy"></button>
+          <button class="gallery-item" data-full="images/dish-4.jpg"><img src="images/dish-4.jpg" alt="Fresh seasonal salad bowl" loading="lazy"></button>
+          <button class="gallery-item" data-full="images/interior-2.jpg"><img src="images/interior-2.jpg" alt="Chef preparing fresh ingredients" loading="lazy"></button>
+          <button class="gallery-item" data-full="images/about.jpg"><img src="images/about.jpg" alt="Our dining room" loading="lazy"></button>
+          <button class="gallery-item" data-full="images/dish-6.jpg"><img src="images/dish-6.jpg" alt="Grilled starter with dip" loading="lazy"></button>
+          <button class="gallery-item" data-full="images/chef.jpg"><img src="images/chef.jpg" alt="Chef plating a dish" loading="lazy"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reservation -->
+    <section id="reservation" class="section section-dark">
+      <div class="container narrow">
+        <div class="section-head">
+          <p class="eyebrow">Reservation</p>
+          <h2 class="section-title">Reserve your table</h2>
+          <p class="muted">For parties of 9 or more, please call us directly.</p>
+        </div>
+
+        <form id="reservation-form" class="form" novalidate>
+          <div class="form-row">
+            <label>Full name
+              <input type="text" name="name" required maxlength="100" autocomplete="name">
+            </label>
+            <label>Phone
+              <input type="tel" name="phone" required maxlength="30" autocomplete="tel">
+            </label>
+          </div>
+          <div class="form-row three">
+            <label>Date
+              <input type="date" name="date" required>
+            </label>
+            <label>Time
+              <select name="time" required>
+                <option value="">Select</option>
+                <option>12:00</option><option>12:30</option><option>13:00</option><option>13:30</option>
+                <option>14:00</option><option>18:00</option><option>18:30</option><option>19:00</option>
+                <option>19:30</option><option>20:00</option><option>20:30</option><option>21:00</option>
+              </select>
+            </label>
+            <label>Guests
+              <select name="guests" required>
+                <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>
+                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                <option value="7">7</option><option value="8">8</option>
+              </select>
+            </label>
+          </div>
+          <label><span>Special requests <span class="muted">(optional)</span></span>
+            <textarea name="notes" rows="3" maxlength="500"></textarea>
+          </label>
+          <!-- Honeypot: hidden from people, bots tend to fill it -->
+          <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button type="submit" class="btn" id="reservation-submit">Request Reservation</button>
+          <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="section">
+      <div class="container contact-grid">
+        <div>
+          <p class="eyebrow">Contact</p>
+          <h2 class="section-title">Find us</h2>
+          <ul class="contact-list">
+            <li><strong>Address</strong><span>42 Orchard Lane, Old Town<br>Springfield, 12345</span></li>
+            <li><strong>Phone</strong><a href="tel:+15551234567">+1 (555) 123-4567</a></li>
+            <li><strong>Email</strong><a href="mailto:hello@dhanvika.example">hello@dhanvika.example</a></li>
+            <li><strong>Hours</strong>
+              <span>
+                Mon &ndash; Thu: 12:00 &ndash; 22:00<br>
+                Fri &ndash; Sat: 12:00 &ndash; 23:30<br>
+                Sunday: 11:00 &ndash; 21:00
+              </span>
+            </li>
+          </ul>
+        </div>
+        <div class="map">
+          <iframe
+            title="Dhanvika location on Google Maps"
+            src="https://www.google.com/maps?q=42+Orchard+Lane+Springfield&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen></iframe>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>&copy; <span id="year"></span> Dhanvika. All rights reserved.</p>
+      <a href="#top">Back to top &uarr;</a>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" hidden>
+    <button class="lightbox-close" aria-label="Close image">&times;</button>
+    <img src="" alt="">
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>
