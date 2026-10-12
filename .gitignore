@@ -19,3 +19,5 @@ node_modules/
 
 # Supabase CLI local state
 supabase/.temp/
+.vercel
+.env*
