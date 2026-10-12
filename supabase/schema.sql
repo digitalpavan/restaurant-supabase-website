@@ -11,6 +11,7 @@ create table if not exists menu_items (
   description   text,
   price         numeric not null,
   image_url     text,
+  is_veg        boolean not null default true,
   is_available  boolean default true
 );
 
@@ -24,6 +25,8 @@ select * from (values
   ('Gulab Jamun',   'Desserts',    'Traditional Indian dessert',                 120, 'images/gulab-jamun.jpg')
 ) as seed(name, category, description, price, image_url)
 where not exists (select 1 from menu_items);
+
+-- For the full 40-dish menu, also run supabase/menu-update.sql.
 
 -- ---------- 3. Row Level Security: public can read the menu ----------
 alter table menu_items enable row level security;

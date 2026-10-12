@@ -37,7 +37,7 @@ function observeReveal(el, variant, delay = 0) {
 // Every element on the page animates in when it scrolls into view, staggered per parent.
 const REVEALS = [
   [".section-head > *", "up"],
-  ["#menu-filters", "up"],
+  ["#diet-filters, #menu-filters", "up"],
   [".about-image", "left"],
   [".about-grid > div:last-child > .eyebrow, .about-grid > div:last-child > .section-title, .about-grid > div:last-child > p", "right"],
   [".chef", "right"],
@@ -125,17 +125,30 @@ document.querySelectorAll("main section[id]").forEach((sec) => sectionObserver.o
 // ---------- Menu ----------
 const menuGrid = $("#menu");
 const menuFilters = $("#menu-filters");
+const dietFilters = $("#diet-filters");
 const menuStatus = $("#menu-status");
 const menuNote = $("#menu-note");
 let menuItems = [];
 let activeCategory = "All";
+let activeDiet = "All";
+
+const DIETS = [["All", null], ["Veg", "veg"], ["Non-Veg", "nonveg"]];
+const hasDiet = (item) => typeof item.is_veg === "boolean";
+const dietOf = (item) => (item.is_veg ? "veg" : "nonveg");
+
+function dietMark(diet) {
+  const mark = document.createElement("span");
+  mark.className = "diet-mark " + diet;
+  return mark;
+}
 
 const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
 function renderMenu() {
-  const visible = activeCategory === "All"
-    ? menuItems
-    : menuItems.filter((i) => i.category === activeCategory);
+  const diet = DIETS.find(([label]) => label === activeDiet)[1];
+  const visible = menuItems.filter((i) =>
+    (activeCategory === "All" || i.category === activeCategory) &&
+    (!diet || dietOf(i) === diet));
 
   // Build with DOM APIs (textContent) so database content can never inject HTML.
   menuGrid.replaceChildren(...visible.map((item) => {
@@ -148,6 +161,13 @@ function renderMenu() {
       img.alt = item.name;
       img.loading = "lazy";
       card.append(img);
+    } else {
+      // Same size as a photo so the grid stays even until a real image is added.
+      const ph = document.createElement("div");
+      ph.className = "menu-card-placeholder";
+      ph.setAttribute("aria-hidden", "true");
+      ph.textContent = item.name.charAt(0);
+      card.append(ph);
     }
 
     const body = document.createElement("div");
@@ -163,7 +183,12 @@ function renderMenu() {
     const top = document.createElement("div");
     top.className = "menu-card-top";
     const title = document.createElement("h3");
-    title.textContent = item.name;
+    if (hasDiet(item)) {
+      const mark = dietMark(dietOf(item));
+      mark.title = item.is_veg ? "Vegetarian" : "Non-vegetarian";
+      title.append(mark);
+    }
+    title.append(item.name);
     const price = document.createElement("span");
     price.className = "price";
     price.textContent = money.format(item.price);
@@ -180,6 +205,24 @@ function renderMenu() {
     return card;
   }));
   menuGrid.querySelectorAll(".menu-card").forEach((card, i) => observeReveal(card, "zoom", Math.min(i, 8) * 0.08));
+}
+
+function renderDietFilters() {
+  // Only shown once the menu has the is_veg column (see supabase/menu-update.sql).
+  dietFilters.hidden = !menuItems.some(hasDiet);
+  dietFilters.replaceChildren(...DIETS.map(([label, diet]) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "filter-btn" + (label === activeDiet ? " active" : "");
+    if (diet) btn.append(dietMark(diet));
+    btn.append(label);
+    btn.addEventListener("click", () => {
+      activeDiet = label;
+      renderDietFilters();
+      renderMenu();
+    });
+    return btn;
+  }));
 }
 
 function renderFilters() {
@@ -207,6 +250,7 @@ async function loadMenu() {
       return;
     }
     menuStatus.hidden = true;
+    renderDietFilters();
     renderFilters();
     renderMenu();
     if (sample) {

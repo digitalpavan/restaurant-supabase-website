@@ -27,6 +27,8 @@ restaurant-website/
    - `menu_items`: public read-only (hidden when `is_available` is false)
    - `reservations`: public insert-only (the public cannot read, edit or delete bookings)
    - sample menu data
+
+   Then run [supabase/menu-update.sql](supabase/menu-update.sql) the same way to load the full menu (20 veg + 20 non-veg dishes, with the veg/non-veg flag).
 3. Go to **Project Settings → API** and copy the **Project URL** and the **anon / publishable key**.
 4. Paste them into [js/supabase.js](js/supabase.js):
 
