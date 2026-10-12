@@ -58,3 +58,47 @@ from (values
   ('Mutton Biryani',         'Biryani & Rice', 'Dum biryani with slow-cooked tender mutton',                 360, false)
 ) as seed(name, category, description, price, is_veg)
 where not exists (select 1 from menu_items m where m.name = seed.name);
+
+-- ---------- 3. Dish photos (files in images/menu/, free Unsplash photos) ----------
+-- Only fills dishes that don't have a photo yet, so photos changed in the admin page are kept.
+update menu_items m
+set image_url = p.image_url
+from (values
+  ('Gobi Manchurian', 'images/menu/gobi-manchurian.jpg'),
+  ('Veg Spring Rolls', 'images/menu/veg-spring-rolls.jpg'),
+  ('Chilli Paneer', 'images/menu/chilli-paneer.jpg'),
+  ('Paneer Butter Masala', 'images/menu/paneer-butter-masala.jpg'),
+  ('Kadai Paneer', 'images/menu/kadai-paneer.jpg'),
+  ('Palak Paneer', 'images/menu/palak-paneer.jpg'),
+  ('Dal Tadka', 'images/menu/dal-tadka.jpg'),
+  ('Mixed Veg Curry', 'images/menu/mixed-veg-curry.jpg'),
+  ('Paneer Biryani', 'images/menu/paneer-biryani.jpg'),
+  ('Veg Fried Rice', 'images/menu/veg-fried-rice.jpg'),
+  ('Curd Rice', 'images/menu/curd-rice.jpg'),
+  ('Tandoori Roti', 'images/menu/tandoori-roti.jpg'),
+  ('Garlic Naan', 'images/menu/garlic-naan.jpg'),
+  ('Double Ka Meetha', 'images/menu/double-ka-meetha.jpg'),
+  ('Chilli Chicken', 'images/menu/chilli-chicken.jpg'),
+  ('Chicken Lollipop', 'images/menu/chicken-lollipop.jpg'),
+  ('Chicken Tikka', 'images/menu/chicken-tikka.jpg'),
+  ('Tandoori Chicken (Half)', 'images/menu/tandoori-chicken-half.jpg'),
+  ('Apollo Fish', 'images/menu/apollo-fish.jpg'),
+  ('Egg Masala', 'images/menu/egg-masala.jpg'),
+  ('Andhra Chicken Curry', 'images/menu/andhra-chicken-curry.jpg'),
+  ('Butter Chicken', 'images/menu/butter-chicken.jpg'),
+  ('Fish Curry', 'images/menu/fish-curry.jpg'),
+  ('Gongura Mutton', 'images/menu/gongura-mutton.jpg'),
+  ('Egg Biryani', 'images/menu/egg-biryani.jpg'),
+  ('Chicken Fried Rice', 'images/menu/chicken-fried-rice.jpg'),
+  ('Chicken Dum Biryani', 'images/menu/chicken-dum-biryani.jpg'),
+  ('Chicken Fry Piece Biryani', 'images/menu/chicken-fry-piece-biryani.jpg'),
+  ('Mutton Biryani', 'images/menu/mutton-biryani.jpg'),
+  ('Chicken 65', 'images/menu/chicken-65.jpg'),
+  ('Crispy Corn', 'images/menu/crispy-corn.jpg'),
+  ('Jeera Rice', 'images/menu/jeera-rice.jpg'),
+  ('Prawns Fry', 'images/menu/prawns-fry.jpg'),
+  ('Prawns Biryani', 'images/menu/prawns-biryani.jpg'),
+  ('Kadai Chicken', 'images/menu/kadai-chicken.jpg'),
+  ('Mutton Rogan Josh', 'images/menu/mutton-rogan-josh.jpg')
+) as p(name, image_url)
+where m.name = p.name and m.image_url is null;

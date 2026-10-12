@@ -132,6 +132,7 @@ let menuItems = [];
 let activeCategory = "All";
 let activeDiet = "All";
 
+const CATEGORY_ORDER = ["Starters", "Main Course", "Biryani & Rice", "Breads", "Desserts"];
 const DIETS = [["All", null], ["Veg", "veg"], ["Non-Veg", "nonveg"]];
 const hasDiet = (item) => typeof item.is_veg === "boolean";
 const dietOf = (item) => (item.is_veg ? "veg" : "nonveg");
@@ -244,7 +245,13 @@ function renderFilters() {
 async function loadMenu() {
   try {
     const { items, sample } = await fetchMenuItems();
-    menuItems = items;
+    // Menu-card order: course, then veg before non-veg, then price. Unknown categories go last.
+    const rank = (c) => { const i = CATEGORY_ORDER.indexOf(c); return i === -1 ? CATEGORY_ORDER.length : i; };
+    menuItems = [...items].sort((a, b) =>
+      rank(a.category) - rank(b.category) ||
+      a.category.localeCompare(b.category) ||
+      (b.is_veg === true) - (a.is_veg === true) ||
+      a.price - b.price);
     if (!items.length) {
       menuStatus.textContent = "Our menu is being updated. Please check back soon.";
       return;
