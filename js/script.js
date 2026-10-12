@@ -291,7 +291,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !lightbo
 // ---------- Reservation form ----------
 const form = $("#reservation-form");
 const formMessage = $("#form-message");
-const submitBtn = $("#reservation-submit");
+const WHATSAPP_NUMBER = "919490996614"; // country code + number, no "+" or spaces
 
 const localISODate = (d) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 form.elements.date.min = localISODate(new Date());
@@ -301,7 +301,7 @@ function showMessage(text, type) {
   formMessage.className = "form-message " + type;
 }
 
-form.addEventListener("submit", async (e) => {
+form.addEventListener("submit", (e) => {
   e.preventDefault();
   const f = form.elements;
 
@@ -324,27 +324,45 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  submitBtn.disabled = true;
-  showMessage("Sending your request…", "");
-  try {
-    const { saved } = await submitReservation({
-      customer_name: f.name.value.trim(),
-      phone: f.phone.value.trim(),
-      reservation_date: f.date.value,
-      reservation_time: f.time.value,
-      guests: Number(f.guests.value),
-      message: f.notes.value.trim() || null,
-    });
-    if (saved) {
-      showMessage("Thank you! Your request is received. We'll call to confirm shortly.", "success");
-      form.reset();
-    } else {
-      showMessage("Demo mode: Supabase isn't connected yet, so nothing was saved.", "error");
-    }
-  } catch (err) {
-    console.error("Reservation failed:", err);
-    showMessage("Sorry, something went wrong. Please try again or call us.", "error");
-  } finally {
-    submitBtn.disabled = false;
-  }
+  const booking = {
+    customer_name: f.name.value.trim(),
+    phone: f.phone.value.trim(),
+    reservation_date: f.date.value,
+    reservation_time: f.time.value,
+    guests: Number(f.guests.value),
+    message: f.notes.value.trim() || null,
+  };
+
+  // Bookings are sent to the restaurant on WhatsApp. Open it straight away
+  // (before any await) so the browser doesn't treat it as a pop-up.
+  const url = whatsappBookingUrl(booking);
+  const opened = window.open(url, "_blank");
+  if (opened) opened.opener = null;
+  else window.location.href = url;
+
+  formMessage.className = "form-message success";
+  formMessage.replaceChildren(
+    "WhatsApp is opening with your booking. Press send there to confirm. Not opened? ",
+    Object.assign(document.createElement("a"), { href: url, target: "_blank", rel: "noopener", textContent: "Tap here" }),
+  );
+  form.reset();
+
+  // Keep a copy for the owner's admin page; WhatsApp is the booking itself.
+  submitReservation(booking).catch((err) => console.error("Saving booking copy failed:", err));
 });
+
+function whatsappBookingUrl(b) {
+  const date = new Intl.DateTimeFormat("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })
+    .format(new Date(b.reservation_date + "T00:00"));
+  const lines = [
+    "Hello Dhanvika, I'd like to book a table.",
+    "",
+    `Name: ${b.customer_name}`,
+    `Phone: ${b.phone}`,
+    `Date: ${date}`,
+    `Time: ${b.reservation_time}`,
+    `Guests: ${b.guests}`,
+  ];
+  if (b.message) lines.push(`Special requests: ${b.message}`);
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+}
