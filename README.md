@@ -48,7 +48,7 @@ Only accounts listed in the `admins` table get access; the database rules enforc
 
 ### Managing content
 - **Menu:** edit rows in **Table Editor → menu_items**. Set `is_available` to false to hide an item; set `image_url` to a full image URL (or a path such as `images/paneer-tikka.jpg`). Prices are shown in rupees (₹); items appear in the order they were added (by `id`).
-- **Reservations:** view bookings in **Table Editor → reservations**.
+- **Reservations:** the booking form opens WhatsApp with the booking details, addressed to the restaurant's number (`WHATSAPP_NUMBER` in [js/script.js](js/script.js)); the guest presses send to book. A copy is also saved to **Table Editor → reservations** and shown on the admin page.
 
 Until the keys are filled in, the site shows a small sample menu and a note saying so; the reservation form will not save anything.
 
