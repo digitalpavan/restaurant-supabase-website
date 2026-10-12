@@ -39,6 +39,13 @@ restaurant-website/
 
    The anon key is meant to be public; Row Level Security (set up by the SQL above) controls what it can do. **Never put the `service_role` key in this project.**
 
+### Owner login (admin page)
+1. In Supabase go to **Authentication → Users → Add user → Create new user**, enter the owner's email and a password, tick **Auto Confirm User**, and create it.
+2. Run [supabase/admin.sql](supabase/admin.sql) in the SQL Editor. It makes `digitalpavan61@gmail.com` an admin (edit the email at the bottom of the file for a different owner).
+3. Open `/admin.html` on the site (or click **Owner login** in the footer) and sign in. There you can add, edit, hide and delete dishes and view or delete table bookings.
+
+Only accounts listed in the `admins` table get access; the database rules enforce this, not the page.
+
 ### Managing content
 - **Menu:** edit rows in **Table Editor → menu_items**. Set `is_available` to false to hide an item; set `image_url` to a full image URL (or a path such as `images/paneer-tikka.jpg`). Prices are shown in rupees (₹); items appear in the order they were added (by `id`).
 - **Reservations:** view bookings in **Table Editor → reservations**.

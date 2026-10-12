@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dhanvika Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin">
+  <header class="admin-header">
+    <div class="container admin-header-inner">
+      <a href="index.html" class="logo">Dhanvika<span>.</span></a>
+      <div class="admin-header-actions">
+        <span id="admin-email" class="muted"></span>
+        <button type="button" id="logout" class="btn btn-outline btn-small" hidden>Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container admin-main">
+    <!-- Login -->
+    <section id="login-view" class="admin-card login-card" hidden>
+      <p class="eyebrow">Owner login</p>
+      <h1 class="admin-title">Sign in</h1>
+      <form id="login-form" class="form">
+        <label>Email
+          <input type="email" name="email" required autocomplete="username">
+        </label>
+        <label>Password
+          <input type="password" name="password" required autocomplete="current-password">
+        </label>
+        <button type="submit" class="btn">Sign in</button>
+        <p id="login-message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" hidden>
+      <div class="admin-tabs" role="tablist">
+        <button type="button" class="filter-btn active" data-tab="menu-panel" role="tab" aria-selected="true">Menu</button>
+        <button type="button" class="filter-btn" data-tab="bookings-panel" role="tab" aria-selected="false">Bookings <span id="bookings-count"></span></button>
+      </div>
+
+      <!-- Menu -->
+      <div id="menu-panel" class="admin-panel">
+        <div class="admin-panel-head">
+          <h1 class="admin-title">Menu</h1>
+          <button type="button" id="add-dish" class="btn btn-small">+ Add dish</button>
+        </div>
+
+        <form id="dish-form" class="form admin-card" hidden>
+          <h2 id="dish-form-title" class="admin-subtitle">Add dish</h2>
+          <div class="form-row">
+            <label>Name
+              <input type="text" name="name" required maxlength="100">
+            </label>
+            <label>Category
+              <input type="text" name="category" required maxlength="50" list="categories" placeholder="e.g. Starters">
+              <datalist id="categories"></datalist>
+            </label>
+          </div>
+          <label>Description
+            <input type="text" name="description" maxlength="200">
+          </label>
+          <div class="form-row">
+            <label>Price (₹)
+              <input type="number" name="price" required min="0" step="1">
+            </label>
+            <label>Photo <span class="muted">(optional: e.g. images/paneer-tikka.jpg or a full https:// link)</span>
+              <input type="text" name="image_url" maxlength="500">
+            </label>
+          </div>
+          <div class="admin-checks">
+            <label class="check"><input type="radio" name="diet" value="veg" checked> <span class="diet-mark veg"></span> Veg</label>
+            <label class="check"><input type="radio" name="diet" value="nonveg"> <span class="diet-mark nonveg"></span> Non-veg</label>
+            <label class="check"><input type="checkbox" name="is_available" checked> Show on website</label>
+          </div>
+          <div class="admin-form-actions">
+            <button type="submit" class="btn btn-small">Save</button>
+            <button type="button" id="cancel-dish" class="btn btn-outline btn-small">Cancel</button>
+          </div>
+          <p id="dish-message" class="form-message" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="admin-filters">
+          <input type="search" id="dish-search" placeholder="Search dishes" aria-label="Search dishes">
+        </div>
+        <p id="menu-message" class="form-message" role="status" aria-live="polite"></p>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr><th>Dish</th><th>Category</th><th class="num">Price</th><th>On website</th><th></th></tr>
+            </thead>
+            <tbody id="dish-rows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bookings -->
+      <div id="bookings-panel" class="admin-panel" hidden>
+        <div class="admin-panel-head">
+          <h1 class="admin-title">Bookings</h1>
+          <button type="button" id="refresh-bookings" class="btn btn-outline btn-small">Refresh</button>
+        </div>
+        <p id="bookings-message" class="form-message" role="status" aria-live="polite"></p>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr><th>Date</th><th>Time</th><th>Name</th><th>Phone</th><th class="num">Guests</th><th>Requests</th><th></th></tr>
+            </thead>
+            <tbody id="booking-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <p id="admin-loading" class="menu-status">Loading&hellip;</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

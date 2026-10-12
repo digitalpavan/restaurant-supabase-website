@@ -1,0 +1,62 @@
+/* Admin page (admin.html). Builds on style.css. */
+.admin [hidden] { display: none !important; }
+.admin-header { border-bottom: 1px solid var(--border); background: var(--bg-alt); }
+.admin-header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: 64px; }
+.admin-header-actions { display: flex; align-items: center; gap: .9rem; font-size: .85rem; min-width: 0; }
+#admin-email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-main { padding: 2.5rem 0 4rem; }
+.admin-title { font-size: 1.8rem; margin: 0; }
+.admin-subtitle { font-size: 1.25rem; margin: 0; }
+.admin-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+.login-card { max-width: 420px; margin: 3rem auto; }
+.login-card .admin-title { margin-bottom: 1.25rem; }
+
+.admin-tabs { display: flex; gap: .5rem; margin-bottom: 2rem; }
+#bookings-count:not(:empty) { margin-left: .25rem; opacity: .8; }
+.admin-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+#dish-form { margin-bottom: 1.5rem; }
+.admin-checks { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.form label.check { display: inline-flex; align-items: center; gap: .45rem; cursor: pointer; }
+.form label.check input { width: auto; accent-color: var(--accent); }
+.admin-form-actions { display: flex; gap: .6rem; }
+.admin-filters { margin-bottom: 1rem; }
+.admin-filters input {
+  width: min(320px, 100%); padding: .6rem .9rem;
+  font: 400 .95rem var(--font-body); color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+}
+.admin-filters input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.admin-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.admin-table th, .admin-table td { padding: .7rem .9rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.admin-table th { font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--bg-alt); }
+.admin-table tbody tr:last-child td { border-bottom: 0; }
+.admin-table tbody tr:hover { background: rgba(255, 255, 255, .02); }
+.admin-table .num { text-align: right; white-space: nowrap; }
+.admin-table .actions { text-align: right; white-space: nowrap; }
+.admin-table .dish-name { display: flex; align-items: center; gap: .5rem; font-weight: 500; }
+.admin-table .sub { display: block; font-size: .8rem; color: var(--muted); }
+.admin-table tr.hidden-dish td { opacity: .55; }
+.admin-table .empty { text-align: center; color: var(--muted); padding: 2rem; }
+.admin-table tr.past td { opacity: .5; }
+.admin-table a { color: var(--accent); }
+
+.link-btn { padding: .3rem .6rem; font: 500 .82rem var(--font-body); color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+.link-btn:hover { border-color: var(--accent); color: var(--accent); }
+.link-btn.danger:hover { border-color: #f0907f; color: #f0907f; }
+.link-btn + .link-btn { margin-left: .35rem; }
+
+.switch { position: relative; display: inline-block; width: 38px; height: 22px; }
+.switch input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.switch span { position: absolute; inset: 0; background: var(--border); border-radius: 999px; transition: background .2s; pointer-events: none; }
+.switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--text); transition: transform .2s; }
+.switch input:checked + span { background: var(--accent); }
+.switch input:checked + span::after { transform: translateX(16px); }
+.switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 640px) {
+  .admin-main { padding-top: 1.5rem; }
+  .admin-header-actions #admin-email { display: none; }
+  .admin-panel-head { flex-wrap: wrap; }
+}
