@@ -37,3 +37,12 @@
   .auth-card { padding: 1.5rem 1.1rem; }
   .auth-back { display: none; }
 }
+
+/* Privacy policy (privacy.html) */
+.legal { max-width: 720px; line-height: 1.7; }
+.legal h2 { font-size: 1.3rem; margin: 2rem 0 .5rem; }
+.legal ul { padding-left: 1.2rem; }
+.legal li { margin-bottom: .5rem; }
+.legal a { color: var(--accent); }
+.auth-legal { margin: .75rem 0 0; font-size: .78rem; color: var(--muted); text-align: center; }
+.auth-legal a { color: var(--muted); }
