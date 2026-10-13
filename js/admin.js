@@ -29,6 +29,15 @@ function dietMark(isVeg) {
 
 // ---------- Session ----------
 async function showView(session) {
+  // Customers sign in through the same Supabase Auth (login.html); only admins get the dashboard.
+  if (session) {
+    const { data: isAdmin } = await supabaseClient.rpc("is_admin");
+    if (!isAdmin) {
+      await supabaseClient.auth.signOut();
+      showMessage($("#login-message"), "This is a customer account. Please sign in with the owner account.", "error");
+      return;
+    }
+  }
   loading.hidden = true;
   const signedIn = Boolean(session);
   loginView.hidden = signedIn;
@@ -45,7 +54,8 @@ if (!isConfigured) {
 } else {
   supabaseClient.auth.getSession().then(({ data }) => showView(data.session));
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_IN" || event === "SIGNED_OUT") showView(session);
+    // Deferred: awaiting Supabase calls inside this callback can deadlock the auth client.
+    if (event === "SIGNED_IN" || event === "SIGNED_OUT") setTimeout(() => showView(session));
   });
 }
 

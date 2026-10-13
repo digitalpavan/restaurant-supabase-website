@@ -4,6 +4,7 @@ A static restaurant website (HTML, CSS, vanilla JS). The menu is loaded from
 **Supabase**, reservations are saved to Supabase, and the site deploys to **Vercel**.
 
 Pages (sections): Home, About, Menu, Gallery, Reservation, Contact (with Google Map).
+Also `login.html` (customer login) and `admin.html` (owner panel).
 
 ## Project structure
 
@@ -45,6 +46,26 @@ restaurant-website/
 3. Open `/admin.html` on the site (or click **Owner login** in the footer) and sign in. There you can add, edit, hide and delete dishes and view or delete table bookings.
 
 Only accounts listed in the `admins` table get access; the database rules enforce this, not the page.
+
+### Customer login (login.html)
+Customers sign in from **Login** in the top menu with email + password, Google or Facebook. Signed-in customers see their name in the menu and it is filled into the booking form. Customer accounts get no access to the menu editor or bookings.
+
+- **Email + password** works out of the box. New accounts get a confirmation email first. In Supabase, **Authentication → URL Configuration → Site URL** must be the live site address (`https://restaurant-supabase-website-kappa.vercel.app`), with `https://restaurant-supabase-website-kappa.vercel.app/**` under **Redirect URLs**.
+- Until Google or Facebook is switched on, their buttons show "coming soon" and point people to email.
+
+Both use this **callback URL**: `https://bgpsvwddmjmptcqkemxl.supabase.co/auth/v1/callback`
+
+**Google**
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) → create a project (e.g. `Dhanvika`).
+2. **APIs & Services → OAuth consent screen**: choose **External**, fill in app name `Dhanvika`, your email, and save. Then **Publish app**.
+3. **APIs & Services → Credentials → Create credentials → OAuth client ID** → type **Web application**. Under **Authorized redirect URIs** paste the callback URL above. Click **Create** and copy the **Client ID** and **Client secret**.
+4. In Supabase: **Authentication → Sign In / Providers → Google** → turn it on, paste the Client ID and secret, **Save**.
+
+**Facebook**
+1. Go to [developers.facebook.com/apps](https://developers.facebook.com/apps) → **Create app** → use case **Authenticate and request data from users with Facebook Login**.
+2. In the app's **Facebook Login → Settings**, paste the callback URL above into **Valid OAuth Redirect URIs** and save. Make sure the **email** permission is added.
+3. **App settings → Basic**: copy the **App ID** and **App secret**, and add a Privacy Policy URL (Facebook requires one). Switch the app to **Live**.
+4. In Supabase: **Authentication → Sign In / Providers → Facebook** → turn it on, paste the App ID and secret, **Save**.
 
 ### Managing content
 - **Menu:** edit rows in **Table Editor → menu_items**. Set `is_available` to false to hide an item; set `image_url` to a full image URL (or a path such as `images/paneer-tikka.jpg`). Prices are shown in rupees (₹); items appear in the order they were added (by `id`).

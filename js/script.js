@@ -15,6 +15,19 @@ navLinks.addEventListener("click", (e) => { if (e.target.closest("a")) setNav(fa
 
 $("#year").textContent = new Date().getFullYear();
 
+// ---------- Customer account ----------
+// Signed-in customers see their name in the nav and get it filled into the booking form.
+if (isConfigured) {
+  supabaseClient.auth.getSession().then(({ data }) => {
+    const user = data.session?.user;
+    if (!user) return;
+    const name = user.user_metadata?.full_name || user.user_metadata?.name || "";
+    $("#account-link").textContent = name ? "Hi, " + name.split(" ")[0] : "My account";
+    const nameField = $("#reservation-form").elements.name;
+    if (name && !nameField.value) nameField.value = name;
+  });
+}
+
 // ---------- Motion ----------
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 

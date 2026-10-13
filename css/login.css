@@ -1,0 +1,49 @@
+/* Customer login page (login.html). Builds on style.css. */
+.auth-page [hidden] { display: none !important; }
+.auth-header { border-bottom: 1px solid var(--border); background: var(--bg-alt); }
+.auth-header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: 64px; }
+.auth-back { font-size: .88rem; text-decoration: none; }
+.auth-back:hover { color: var(--text); }
+.auth-main { padding: 3rem 0 4rem; }
+
+.auth-card {
+  max-width: 440px; margin: 0 auto; padding: 2rem 1.75rem;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.auth-title { font-size: 1.9rem; margin: 0 0 1.5rem; }
+.auth-card .form .btn { justify-self: stretch; }
+
+.social-buttons { display: grid; gap: .7rem; }
+.social-btn {
+  display: flex; align-items: center; justify-content: center; gap: .7rem;
+  width: 100%; padding: .75rem 1rem;
+  font: 500 .95rem var(--font-body); color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  cursor: pointer; transition: border-color .2s, transform .2s;
+}
+.social-btn svg { width: 20px; height: 20px; flex: none; }
+.social-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.social-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.social-btn:disabled { opacity: .6; cursor: wait; transform: none; }
+
+.auth-divider { display: flex; align-items: center; gap: .8rem; margin: 1.5rem 0; color: var(--muted); font-size: .82rem; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+.text-btn {
+  padding: 0; font: 500 .88rem var(--font-body); color: var(--accent);
+  background: none; border: 0; cursor: pointer; justify-self: start;
+}
+.text-btn:hover { text-decoration: underline; }
+#forgot-link { justify-self: end; margin-top: -.6rem; }
+
+.auth-switch { margin: 1.25rem 0 0; font-size: .9rem; color: var(--muted); text-align: center; }
+.auth-switch .text-btn { margin-left: .25rem; }
+
+.account-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin: 1.5rem 0 1.25rem; }
+#account-email { color: var(--text); word-break: break-all; }
+
+@media (max-width: 560px) {
+  .auth-main { padding-top: 1.75rem; }
+  .auth-card { padding: 1.5rem 1.1rem; }
+  .auth-back { display: none; }
+}
