@@ -12,17 +12,25 @@ const authForm = $("#auth-form");
 const authMessage = $("#auth-message");
 const submitBtn = $("#auth-submit");
 
-// Where Google, Facebook and email links send the customer back to.
-const RETURN_URL = new URL("login.html", window.location.href).href;
+// ?next=index.html#reservation sends the customer back there once signed in.
+// Only pages on this site are allowed, so the link can't be abused to redirect elsewhere.
+const nextPage = (() => {
+  const next = new URLSearchParams(window.location.search).get("next");
+  if (!next) return null;
+  const url = new URL(next, window.location.href);
+  return url.origin === window.location.origin ? url.href : null;
+})();
+
+// Where Google, Facebook and email links send the customer back to (this page, keeping ?next).
+const returnUrl = () => {
+  const url = new URL("login.html", window.location.href);
+  if (nextPage) url.searchParams.set("next", nextPage.replace(window.location.origin + "/", ""));
+  return url.href;
+};
 
 function showMessage(el, text, type = "") {
   el.textContent = text;
   el.className = "form-message " + type;
-}
-
-function displayName(user) {
-  const m = user.user_metadata || {};
-  return m.full_name || m.name || user.email.split("@")[0];
 }
 
 function showOnly(view) {
@@ -30,12 +38,21 @@ function showOnly(view) {
   for (const v of [authView, resetView, accountView]) v.hidden = v !== view;
 }
 
+function signedIn(user) {
+  if (nextPage) {
+    // The home page shows a short "Welcome" note after this.
+    try { sessionStorage.setItem("dhanvika-welcome", "1"); } catch {}
+    window.location.replace(nextPage);
+    return;
+  }
+  showAccount(user);
+}
+
 function showAccount(user) {
-  $("#account-name").textContent = displayName(user);
+  $("#account-name").textContent = customerName(user) || user.email.split("@")[0];
   $("#account-email").textContent = user.email;
   const provider = user.app_metadata?.provider;
-  $("#account-provider").textContent = provider && provider !== "email"
-    ? `(via ${provider[0].toUpperCase() + provider.slice(1)})` : "";
+  $("#account-provider").textContent = provider && provider !== "email" ? `(via ${PROVIDER_NAMES[provider] || provider})` : "";
   showOnly(accountView);
 }
 
@@ -63,6 +80,7 @@ function setMode(next) {
 }
 $("#switch-mode").addEventListener("click", () => setMode(MODES[mode].next));
 $("#forgot-link").addEventListener("click", () => setMode("forgot"));
+if (new URLSearchParams(window.location.search).get("mode") === "signup") setMode("signup");
 
 // ---------- Email + password ----------
 const AUTH_ERRORS = {
@@ -103,10 +121,10 @@ authForm.addEventListener("submit", async (e) => {
   } else if (mode === "signup") {
     result = await supabaseClient.auth.signUp({
       email, password,
-      options: { data: { full_name: f.full_name.value.trim() }, emailRedirectTo: RETURN_URL },
+      options: { data: { full_name: f.full_name.value.trim() }, emailRedirectTo: returnUrl() },
     });
   } else {
-    result = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: RETURN_URL });
+    result = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: new URL("login.html", window.location.href).href });
   }
   submitBtn.disabled = false;
 
@@ -125,39 +143,7 @@ authForm.addEventListener("submit", async (e) => {
 });
 
 // ---------- Google / Facebook ----------
-// Which providers are switched on in Supabase → Authentication → Sign In / Providers.
-const providersReady = isConfigured
-  ? fetch(SUPABASE_URL + "/auth/v1/settings", { headers: { apikey: SUPABASE_KEY } })
-      .then((r) => r.json()).then((s) => s.external || {}).catch(() => ({}))
-  : Promise.resolve({});
-
-document.querySelectorAll(".social-btn").forEach((btn) => {
-  btn.addEventListener("click", async () => {
-    btn.disabled = true;
-    const provider = btn.dataset.provider;
-    if (!(await providersReady)[provider]) {
-      btn.disabled = false;
-      showMessage(authMessage, `${btn.textContent.trim().replace("Continue with ", "")} login is coming soon. Please use your email for now.`, "error");
-      return;
-    }
-    const { error } = await supabaseClient.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: RETURN_URL },
-    });
-    // On success the browser leaves for Google / Facebook, so only errors land here.
-    if (error) {
-      btn.disabled = false;
-      showMessage(authMessage, friendlyError(error), "error");
-    }
-  });
-});
-
-// Errors sent back by Google / Facebook (e.g. the customer pressed Cancel).
-const returned = new URLSearchParams(window.location.hash.slice(1) || window.location.search);
-if (returned.get("error_description")) {
-  showMessage(authMessage, returned.get("error_description").replace(/\+/g, " "), "error");
-  history.replaceState(null, "", window.location.pathname);
-}
+setupSocialButtons(returnUrl, (text) => showMessage(authMessage, text, "error"));
 
 // ---------- New password (from the reset email) ----------
 $("#reset-form").addEventListener("submit", async (e) => {
@@ -194,12 +180,12 @@ if (!isConfigured) {
     // Defer: calling Supabase inside this callback can deadlock the auth client.
     setTimeout(() => {
       if (event === "PASSWORD_RECOVERY") showOnly(resetView);
-      else if (event === "SIGNED_IN" && resetView.hidden) showAccount(session.user);
+      else if (event === "SIGNED_IN" && resetView.hidden && accountView.hidden) signedIn(session.user);
     });
   });
   supabaseClient.auth.getSession().then(({ data }) => {
     if (!resetView.hidden) return;
-    if (data.session) showAccount(data.session.user);
+    if (data.session) signedIn(data.session.user);
     else showOnly(authView);
   });
 }

@@ -147,6 +147,11 @@
           <p class="muted">Bookings are confirmed on WhatsApp. For parties of 9 or more, message us on <a href="https://wa.me/919490996614" target="_blank" rel="noopener">WhatsApp</a>.</p>
         </div>
 
+        <!-- Filled in by js/script.js: a sign-in nudge, or "Booking as <name>" when signed in -->
+        <p id="booking-account" class="booking-account">
+          <span>Have an account? <a href="login.html?next=index.html%23reservation">Sign in</a> and we'll fill in your details. Or just book as a guest below.</span>
+        </p>
+
         <form id="reservation-form" class="form" novalidate>
           <div class="form-row">
             <label>Full name
@@ -222,10 +227,17 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <p>&copy; <span id="year"></span> Dhanvika. All rights reserved.</p>
-      <a href="admin.html">Owner login</a>
+      <nav class="footer-links" aria-label="Account">
+        <a href="login.html" id="footer-account">Customer login</a>
+        <a href="login.html?mode=signup" id="footer-signup">Create account</a>
+        <a href="admin.html">Owner login</a>
+      </nav>
       <a href="#top">Back to top &uarr;</a>
     </div>
   </footer>
+
+  <!-- Shown once after a customer signs in -->
+  <div id="welcome-toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <!-- Lightbox -->
   <div id="lightbox" class="lightbox" hidden>

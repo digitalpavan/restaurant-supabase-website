@@ -30,24 +30,28 @@ function dietMark(isVeg) {
 // ---------- Session ----------
 async function showView(session) {
   // Customers sign in through the same Supabase Auth (login.html); only admins get the dashboard.
+  // A signed-in customer stays signed in on the website and just sees the owner login here.
+  let isAdmin = false;
   if (session) {
-    const { data: isAdmin } = await supabaseClient.rpc("is_admin");
+    ({ data: isAdmin } = await supabaseClient.rpc("is_admin"));
     if (!isAdmin) {
-      await supabaseClient.auth.signOut();
-      showMessage($("#login-message"), "This is a customer account. Please sign in with the owner account.", "error");
-      return;
+      showMessage($("#login-message"), `${session.user.email} is a customer account. Please sign in with the owner account.`, "error");
     }
   }
   loading.hidden = true;
-  const signedIn = Boolean(session);
+  const signedIn = Boolean(session) && isAdmin;
   loginView.hidden = signedIn;
   dashboard.hidden = !signedIn;
   logoutBtn.hidden = !signedIn;
   adminEmail.textContent = signedIn ? session.user.email : "";
   if (signedIn) {
-    await Promise.all([loadDishes(), loadBookings()]);
+    await Promise.all([loadDishes(), loadBookings(), loadCustomers()]);
   }
 }
+
+// Google / Facebook bring the owner back to this page; non-admin accounts are turned away above.
+setupSocialButtons(() => new URL("admin.html", window.location.href).href,
+  (text) => showMessage($("#login-message"), text, "error"));
 
 if (!isConfigured) {
   loading.textContent = "Supabase is not configured. Add your keys in js/supabase.js.";
@@ -285,6 +289,51 @@ async function loadBookings() {
   }));
 }
 $("#refresh-bookings").addEventListener("click", loadBookings);
+
+// ---------- Customers ----------
+const customerRows = $("#customer-rows");
+const customersMessage = $("#customers-message");
+const customerSearch = $("#customer-search");
+const shortDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
+let customers = [];
+
+async function loadCustomers() {
+  showMessage(customersMessage, "");
+  // admin_list_customers() is in supabase/customers.sql and only answers admins.
+  const { data, error } = await supabaseClient.rpc("admin_list_customers");
+  if (error) {
+    console.error(error);
+    showMessage(customersMessage, "Couldn't load customers. Has supabase/customers.sql been run?", "error");
+    return;
+  }
+  customers = data;
+  $("#customers-count").textContent = customers.length ? `(${customers.length})` : "";
+  const by = (p) => customers.filter((c) => c.provider === p).length;
+  $("#customer-stats").replaceChildren(...["google", "facebook", "email"].map((p) =>
+    el("span", { className: "provider-tag " + p, textContent: `${PROVIDER_NAMES[p]}: ${by(p)}` })));
+  renderCustomers();
+}
+
+function renderCustomers() {
+  const q = customerSearch.value.trim().toLowerCase();
+  const visible = customers.filter((c) => !q ||
+    [c.full_name, c.email, c.phone].some((v) => v && v.toLowerCase().includes(q)));
+  if (!visible.length) {
+    customerRows.replaceChildren(el("tr", {}, el("td", { colSpan: 6, className: "empty",
+      textContent: q ? "No customers match your search." : "No customer accounts yet. They appear here when people sign up on the website." })));
+    return;
+  }
+  customerRows.replaceChildren(...visible.map((c) => el("tr", {},
+    el("td", {}, el("span", { className: "dish-name", textContent: c.full_name || "—" }),
+      c.confirmed ? "" : el("span", { className: "sub", textContent: "Email not confirmed yet" })),
+    el("td", {}, el("a", { href: "mailto:" + c.email, textContent: c.email })),
+    el("td", {}, c.phone ? el("a", { href: "tel:" + c.phone.replace(/[^\d+]/g, ""), textContent: c.phone }) : ""),
+    el("td", {}, el("span", { className: "provider-tag " + c.provider, textContent: PROVIDER_NAMES[c.provider] || c.provider })),
+    el("td", { textContent: shortDate.format(new Date(c.created_at)) }),
+    el("td", { textContent: c.last_sign_in_at ? shortDate.format(new Date(c.last_sign_in_at)) : "—" }))));
+}
+customerSearch.addEventListener("input", renderCustomers);
+$("#refresh-customers").addEventListener("click", loadCustomers);
 
 async function deleteBooking(b) {
   if (!confirm(`Delete the booking for ${b.customer_name}? This can't be undone.`)) return;

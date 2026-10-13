@@ -43,12 +43,15 @@ restaurant-website/
 ### Owner login (admin page)
 1. In Supabase go to **Authentication → Users → Add user → Create new user**, enter the owner's email and a password, tick **Auto Confirm User**, and create it.
 2. Run [supabase/admin.sql](supabase/admin.sql) in the SQL Editor. It makes `digitalpavan61@gmail.com` an admin (edit the email at the bottom of the file for a different owner).
-3. Open `/admin.html` on the site (or click **Owner login** in the footer) and sign in. There you can add, edit, hide and delete dishes and view or delete table bookings.
+3. Run [supabase/customers.sql](supabase/customers.sql) the same way (it powers the **Customers** tab).
+4. Open `/admin.html` on the site (or click **Owner login** in the footer) and sign in. There you can add, edit, hide and delete dishes, view or delete table bookings, and see every customer who signed up (name, email, phone, and whether they joined with Google, Facebook or email).
+
+Once Google or Facebook is switched on (see below), the owner can also sign in with them, as long as that Google/Facebook account uses the same email as the owner account (Supabase links them automatically).
 
 Only accounts listed in the `admins` table get access; the database rules enforce this, not the page.
 
 ### Customer login (login.html)
-Customers sign in from **Login** in the top menu with email + password, Google or Facebook. Signed-in customers see their name in the menu and it is filled into the booking form. Customer accounts get no access to the menu editor or bookings.
+Customers sign in from **Login** in the top menu, the footer, or the "Sign in" link above the booking form, with email + password, Google or Facebook. After signing in they're taken back to where they were with a short welcome note. Signed-in customers see their name in the menu, and their name and phone (remembered from their last booking) are filled into the booking form. Guests can still book without an account. Customer accounts get no access to the menu editor or bookings.
 
 - **Email + password** works out of the box. New accounts get a confirmation email first. In Supabase, **Authentication → URL Configuration → Site URL** must be the live site address (`https://restaurant-supabase-website-kappa.vercel.app`), with `https://restaurant-supabase-website-kappa.vercel.app/**` under **Redirect URLs**.
 - Until Google or Facebook is switched on, their buttons show "coming soon" and point people to email.

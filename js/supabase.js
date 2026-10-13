@@ -34,6 +34,57 @@ async function fetchMenuItems() {
   return { items: data, sample: false };
 }
 
+// ---------- Sign in with Google / Facebook (login.html and admin.html) ----------
+// Which providers are switched on in Supabase → Authentication → Sign In / Providers.
+let providersPromise;
+function enabledProviders() {
+  providersPromise ||= isConfigured
+    ? fetch(SUPABASE_URL + "/auth/v1/settings", { headers: { apikey: SUPABASE_KEY } })
+        .then((r) => r.json()).then((s) => s.external || {}).catch(() => ({}))
+    : Promise.resolve({});
+  return providersPromise;
+}
+
+const PROVIDER_NAMES = { google: "Google", facebook: "Facebook", email: "Email" };
+
+// Wires up every .social-btn[data-provider] on the page. returnTo() gives the
+// address the provider sends the person back to; onError shows a message.
+function setupSocialButtons(returnTo, onError) {
+  document.querySelectorAll(".social-btn[data-provider]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const provider = btn.dataset.provider;
+      btn.disabled = true;
+      if (!(await enabledProviders())[provider]) {
+        btn.disabled = false;
+        onError(`${PROVIDER_NAMES[provider]} login is coming soon. Please use your email for now.`);
+        return;
+      }
+      const { error } = await supabaseClient.auth.signInWithOAuth({ provider, options: { redirectTo: returnTo() } });
+      // On success the browser leaves for Google / Facebook, so only errors land here.
+      if (error) {
+        btn.disabled = false;
+        onError(error.message);
+      }
+    });
+  });
+
+  // Errors sent back by Google / Facebook (e.g. the person pressed Cancel).
+  const params = new URLSearchParams(window.location.search);
+  const returned = new URLSearchParams(window.location.hash.slice(1));
+  const message = returned.get("error_description") || params.get("error_description");
+  if (message) {
+    onError(message.replace(/\+/g, " "));
+    const next = params.get("next");
+    history.replaceState(null, "", window.location.pathname + (next ? "?next=" + encodeURIComponent(next) : ""));
+  }
+}
+
+// Customer's display name from email sign-up, Google or Facebook.
+function customerName(user) {
+  const m = user?.user_metadata || {};
+  return m.full_name || m.name || "";
+}
+
 async function submitReservation(reservation) {
   if (!isConfigured) {
     console.warn("Supabase is not configured. Reservation was NOT saved:", reservation);

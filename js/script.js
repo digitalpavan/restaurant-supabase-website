@@ -16,15 +16,51 @@ navLinks.addEventListener("click", (e) => { if (e.target.closest("a")) setNav(fa
 $("#year").textContent = new Date().getFullYear();
 
 // ---------- Customer account ----------
-// Signed-in customers see their name in the nav and get it filled into the booking form.
+// Signed-in customers see their name in the nav, footer and booking section,
+// and get their name and phone filled into the booking form.
+let customer = null;
+
+function fillBookingDetails() {
+  if (!customer) return;
+  const f = $("#reservation-form").elements;
+  const name = customerName(customer);
+  const phone = customer.user_metadata?.phone;
+  if (name && !f.name.value) f.name.value = name;
+  if (phone && !f.phone.value) f.phone.value = phone;
+}
+
+function showWelcome(name) {
+  let shown = false;
+  try { shown = !sessionStorage.getItem("dhanvika-welcome"); sessionStorage.removeItem("dhanvika-welcome"); } catch {}
+  if (shown) return;
+  const toast = $("#welcome-toast");
+  toast.textContent = `Welcome${name ? ", " + name.split(" ")[0] : ""}! You're signed in. Your details are filled in when you book.`;
+  toast.hidden = false;
+  setTimeout(() => { toast.hidden = true; }, 5000);
+}
+
 if (isConfigured) {
   supabaseClient.auth.getSession().then(({ data }) => {
-    const user = data.session?.user;
-    if (!user) return;
-    const name = user.user_metadata?.full_name || user.user_metadata?.name || "";
-    $("#account-link").textContent = name ? "Hi, " + name.split(" ")[0] : "My account";
-    const nameField = $("#reservation-form").elements.name;
-    if (name && !nameField.value) nameField.value = name;
+    customer = data.session?.user || null;
+    if (!customer) return;
+    const name = customerName(customer);
+    const first = name.split(" ")[0];
+    $("#account-link").textContent = first ? "Hi, " + first : "My account";
+    $("#footer-account").textContent = "My account";
+    $("#footer-signup").hidden = true;
+
+    const signOut = Object.assign(document.createElement("button"), { type: "button", className: "text-link", textContent: "Sign out" });
+    signOut.addEventListener("click", async () => {
+      await supabaseClient.auth.signOut();
+      window.location.reload();
+    });
+    $("#booking-account").replaceChildren(
+      Object.assign(document.createElement("span"), { textContent: `Booking as ${name || customer.email}. ` }),
+      Object.assign(document.createElement("a"), { href: "login.html", textContent: "My account" }),
+      " · ", signOut);
+
+    fillBookingDetails();
+    showWelcome(name);
   });
 }
 
@@ -359,6 +395,14 @@ form.addEventListener("submit", (e) => {
     Object.assign(document.createElement("a"), { href: url, target: "_blank", rel: "noopener", textContent: "Tap here" }),
   );
   form.reset();
+
+  // Remember a signed-in customer's phone so the next booking is quicker.
+  if (customer && customer.user_metadata?.phone !== booking.phone) {
+    customer.user_metadata = { ...customer.user_metadata, phone: booking.phone };
+    supabaseClient.auth.updateUser({ data: { phone: booking.phone } })
+      .catch((err) => console.error("Saving phone failed:", err));
+  }
+  fillBookingDetails();
 
   // Keep a copy for the owner's admin page; WhatsApp is the booking itself.
   submitReservation(booking).catch((err) => console.error("Saving booking copy failed:", err));

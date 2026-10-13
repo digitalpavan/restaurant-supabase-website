@@ -40,6 +40,16 @@
 .admin-table tr.hidden-dish td { opacity: .55; }
 .admin-table .empty { text-align: center; color: var(--muted); padding: 2rem; }
 .admin-table tr.past td { opacity: .5; }
+
+.login-note { margin: 1.25rem 0 0; font-size: .88rem; text-align: center; }
+.login-note a { color: var(--accent); }
+.admin-hint { margin: -.75rem 0 1.25rem; font-size: .9rem; }
+.admin-filters-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; }
+.customer-stats { display: flex; flex-wrap: wrap; gap: .4rem; }
+.provider-tag { display: inline-block; padding: .2rem .6rem; font-size: .78rem; font-weight: 500; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
+.provider-tag.google { border-color: #4285f4; color: #8ab4f8; }
+.provider-tag.facebook { border-color: #1877f2; color: #7fb0ff; }
+.provider-tag.email { border-color: var(--accent); color: var(--accent); }
 .admin-table a { color: var(--accent); }
 
 .link-btn { padding: .3rem .6rem; font: 500 .82rem var(--font-body); color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
