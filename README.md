@@ -44,7 +44,7 @@ restaurant-website/
 1. In Supabase go to **Authentication → Users → Add user → Create new user**, enter the owner's email and a password, tick **Auto Confirm User**, and create it.
 2. Run [supabase/admin.sql](supabase/admin.sql) in the SQL Editor. It makes `digitalpavan61@gmail.com` an admin (edit the email at the bottom of the file for a different owner).
 3. Run [supabase/customers.sql](supabase/customers.sql) the same way (it powers the **Customers** tab).
-4. Open `/admin.html` on the site (or click **Owner login** in the footer) and sign in. There you can add, edit, hide and delete dishes, view or delete table bookings, and see every customer who signed up (name, email, phone, and whether they joined with Google, Facebook or email).
+4. Open `/admin.html` on the site (type it after the site address; it isn't linked from the website) and sign in. There you can add, edit, hide and delete dishes, view or delete table bookings, and see every customer who signed up (name, email, phone, and whether they joined with Google, Facebook or email).
 
 Once Google or Facebook is switched on (see below), the owner can also sign in with them, as long as that Google/Facebook account uses the same email as the owner account (Supabase links them automatically).
 
