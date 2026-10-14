@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin.html
+
+Sitemap: https://restaurant-supabase-website-kappa.vercel.app/sitemap.xml
