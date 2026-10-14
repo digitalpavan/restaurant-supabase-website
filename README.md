@@ -103,9 +103,16 @@ vercel --prod # production deployment
 
 Every push to the main branch redeploys automatically with Option A.
 
+## Google search & link previews
+
+- [index.html](index.html) has the page title and description Google shows, link-preview tags for WhatsApp/Facebook (image: `images/og-image.jpg`, 1200×630), and restaurant details (address, phone, hours) in a `<script type="application/ld+json">` block.
+- [robots.txt](robots.txt) and [sitemap.xml](sitemap.xml) tell search engines what to index (the admin page is excluded).
+- If the site moves to its own domain, replace `restaurant-supabase-website-kappa.vercel.app` in those three files.
+- To get listed faster: add the site in [Google Search Console](https://search.google.com/search-console), submit `sitemap.xml`, and put the website link on your [Google Business Profile](https://business.google.com).
+
 ## Customising
 
-- Name, address, phone, email, hours: edit [index.html](index.html) (hero hours and Contact section).
+- Name, address, phone, email, hours: edit [index.html](index.html) (hero hours, Contact section, and the restaurant details block in `<head>`).
 - Google Map: change the `q=` address in the `<iframe src>` in the Contact section.
 - Colours and fonts: CSS variables at the top of [css/style.css](css/style.css).
 - Photos in `images/` are stock images from [Unsplash](https://unsplash.com); replace them with your own food and venue photos before launch.
